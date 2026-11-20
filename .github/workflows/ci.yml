@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm test
+      - name: Self-scan clean workflow
+        run: node bin/flowguard.js scan test/fixtures/good-workflow.yml --fail-on high
+      - name: Verify SARIF output
+        run: |
+          node bin/flowguard.js scan test/fixtures/bad-workflow.yml --format sarif > flowguard.sarif || true
+          node -e "const fs=require('fs');const s=JSON.parse(fs.readFileSync('flowguard.sarif','utf8'));if(s.version!=='2.1.0'||!s.runs[0].results.length)process.exit(1)"

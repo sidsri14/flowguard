@@ -1,0 +1,19 @@
+name: Bad workflow
+on:
+  pull_request_target:
+permissions: write-all
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: greet
+        run: echo "${{ github.event.issue.title }}"
+      - name: install
+        run: curl https://example.com/install.sh | bash
+      - name: secrets
+        env:
+          API_PASSWORD: literalpassword123
+        run: echo done

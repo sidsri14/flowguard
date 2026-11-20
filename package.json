@@ -1,0 +1,20 @@
+{
+  "name": "flowguard",
+  "version": "0.1.0",
+  "description": "Line-based static security linter for GitHub Actions workflows",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": { "flowguard": "bin/flowguard.js" },
+  "scripts": {
+    "scan": "node bin/flowguard.js scan",
+    "rules": "node bin/flowguard.js rules",
+    "test": "node --test test/*.test.js",
+    "sample-report": "node scripts/make-sample-report.mjs"
+  },
+  "engines": { "node": ">=20" },
+  "files": ["bin", "src", "README.md", "LICENSE"],
+  "keywords": ["github-actions", "security", "linter", "sarif", "cicd", "static-analysis"],
+  "license": "MIT",
+  "author": "Siddharth Srivastava",
+  "repository": { "type": "git", "url": "git+https://github.com/sidsri14/flowguard.git" }
+}

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>flowguard — sample GitHub Actions security review</title>
+<style>
+ body{font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;max-width:1100px;margin:40px auto;padding:0 20px;color:#1a1a1a}
+ h1{font-size:26px;margin-bottom:4px}.sub{color:#666;margin-bottom:28px}
+ .card{border:1px solid #e2e2e2;border-radius:8px;padding:18px 20px;margin-bottom:22px}
+ table{border-collapse:collapse;width:100%;font-size:14px}
+ th,td{border-bottom:1px solid #eee;padding:9px 8px;text-align:left;vertical-align:top}
+ th{background:#fafafa;font-weight:600}code{font-family:ui-monospace,Consolas,monospace;font-size:13px}
+ .sev{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:700}
+ .high{background:#ffe3e3;color:#b00020}.medium{background:#fff3cd;color:#7a5b00}.low{background:#e7f0ff;color:#0b4f9c}
+ .note{background:#f6f6f6;border-left:4px solid #888;padding:12px 16px;color:#444}
+</style></head><body>
+<h1>flowguard — sample GitHub Actions security review</h1>
+<div class="sub">Generated from a real scan of <code>bad-workflow.yml</code> — a synthetic fixture, not a customer's repository.</div>
+<div class="card"><strong>1</strong> file scanned &nbsp;·&nbsp;
+ <span class="high">4 high</span> <span class="medium">2 medium</span>
+ <span class="low">1 low</span> &nbsp;·&nbsp; <strong>7</strong> total findings</div>
+<div class="card"><h2>Findings</h2><table>
+<thead><tr><th>Severity</th><th>Rule</th><th>Location</th><th>Field</th><th>What it means</th><th>How to fix</th></tr></thead>
+<tbody>
+      <tr>
+        <td><span class="sev high">HIGH</span></td>
+        <td><code>FG001</code></td>
+        <td>line 9</td>
+        <td><code>uses</code></td>
+        <td>Action &#39;actions/checkout&#39; uses mutable ref &#39;v4&#39;, not a pinned commit SHA</td>
+        <td>Pin to a full 40-character commit SHA: uses: owner/repo@&lt;40-hex-sha&gt; # v1.2.3</td>
+      </tr>
+
+      <tr>
+        <td><span class="sev high">HIGH</span></td>
+        <td><code>FG002</code></td>
+        <td>line 9</td>
+        <td><code>checkout.ref</code></td>
+        <td>pull_request_target workflow checks out a PR-controlled ref</td>
+        <td>Avoid running PR code under pull_request_target; use pull_request with least-privilege permissions, or never execute checked-out PR code in the privileged job.</td>
+      </tr>
+
+      <tr>
+        <td><span class="sev high">HIGH</span></td>
+        <td><code>FG003</code></td>
+        <td>line 13</td>
+        <td><code>run</code></td>
+        <td>Untrusted github.event text interpolated into a run: script</td>
+        <td>Pass untrusted data through env: and reference it as &quot;$VAR&quot; instead of interpolating ${{ ... }} into the shell.</td>
+      </tr>
+
+      <tr>
+        <td><span class="sev high">HIGH</span></td>
+        <td><code>FG005</code></td>
+        <td>line 18</td>
+        <td><code>env.API_PASSWORD</code></td>
+        <td>Possible hardcoded credential in env key &#39;API_PASSWORD&#39; (value masked)</td>
+        <td>Use repository/organization secrets via ${{ secrets.NAME }} and rotate any credential that was committed.</td>
+      </tr>
+
+      <tr>
+        <td><span class="sev medium">MEDIUM</span></td>
+        <td><code>FG004</code></td>
+        <td>line 4</td>
+        <td><code>permissions</code></td>
+        <td>Workflow uses permissions: write-all</td>
+        <td>Use permissions: contents: read (or the minimum set) and elevate only the specific job that needs more.</td>
+      </tr>
+
+      <tr>
+        <td><span class="sev medium">MEDIUM</span></td>
+        <td><code>FG006</code></td>
+        <td>line 15</td>
+        <td><code>run</code></td>
+        <td>Remote content piped directly to a shell</td>
+        <td>Fetch, verify a checksum, then execute a reviewed local copy, or vendor the script into the repository.</td>
+      </tr>
+
+      <tr>
+        <td><span class="sev low">LOW</span></td>
+        <td><code>FG007</code></td>
+        <td>line 9</td>
+        <td><code>checkout</code></td>
+        <td>actions/checkout does not set persist-credentials: false</td>
+        <td>Set persist-credentials: false on the checkout step unless a later step genuinely needs the token.</td>
+      </tr></tbody></table></div>
+<div class="note"><strong>Scope of this review.</strong> flowguard is a line-based heuristic scanner over workflow YAML text.
+It does not execute workflows, contact GitHub, or read secrets. It may produce false positives/negatives and is not a
+substitute for a full workflow review. A clean result means none of the seven documented patterns were found — not that
+the workflow is secure. Credential values are masked.</div>
+<div class="card"><h2>What a paid review includes</h2><ol>
+<li>Run flowguard across the supplied workflow files.</li>
+<li>Written finding-by-finding report with severity, location, rationale, and concrete fix.</li>
+<li>A corrected example workflow (SHA-pinned actions, least-privilege permissions, env-safe scripts).</li>
+<li>Optional SARIF file for GitHub code-scanning integration.</li>
+<li>One recheck after fixes are applied.</li>
+</ol><p>Source and test suite: <a href="https://github.com/sidsri14/flowguard">github.com/sidsri14/flowguard</a></p></div>
+</body></html>
