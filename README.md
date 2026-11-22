@@ -25,7 +25,7 @@ Workflows run with powerful tokens on every push and PR. Common, checkable mista
 - does not execute workflows, contact GitHub, or read repository secrets;
 - is not a substitute for a full workflow review, least-privilege design, or a dedicated tool like `zizmor`.
 
-A clean scan means "none of these seven patterns were found," not "this workflow is secure."
+A clean scan means "none of these nine patterns were found," not "this workflow is secure."
 
 ## Install
 
@@ -70,6 +70,8 @@ flowguard --version
 | `FG005` | HIGH | Hardcoded credential in `env:` (value masked in output) |
 | `FG006` | MEDIUM | `curl`/`wget` piped directly to a shell |
 | `FG007` | LOW | `actions/checkout` without `persist-credentials: false` |
+| `FG008` | HIGH | Self-hosted runner used on pull_request or untrusted event |
+| `FG009` | MEDIUM | Workflow missing explicit top-level permissions block |
 
 ## Development
 
