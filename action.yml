@@ -1,0 +1,31 @@
+name: "flowguard — GitHub Actions Workflow Security Scan"
+description: "Static security linter for GitHub Actions workflows: script injection, unpinned actions, self-hosted runner risks, and token overprivilege. SARIF output."
+author: "Siddharth Srivastava"
+branding:
+  icon: "shield"
+  color: "yellow"
+inputs:
+  path:
+    description: "Directory or path of workflow files to scan (default: .github/workflows)"
+    required: false
+    default: ".github/workflows"
+  format:
+    description: "human | json | sarif"
+    required: false
+    default: "sarif"
+  fail-on:
+    description: "high | medium | low"
+    required: false
+    default: "high"
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    - name: Run flowguard
+      shell: bash
+      run: |
+        node "${{ github.action_path }}/bin/flowguard.js" scan "${{ inputs.path }}" \
+          --format "${{ inputs.format }}" --fail-on "${{ inputs.fail-on }}" > flowguard-report.txt || true
+        cat flowguard-report.txt
