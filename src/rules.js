@@ -143,5 +143,37 @@ export const RULES = [
       });
       return out;
     }
+  },
+  {
+    id: "FG008",
+    severity: "HIGH",
+    title: "Self-hosted runner used on pull_request or untrusted event",
+    rationale:
+      "Running untrusted pull requests on self-hosted runners exposes internal network infrastructure, host secrets, and container daemons to arbitrary code execution.",
+    remediation: "Use GitHub-hosted runners (ubuntu-latest) for pull requests from untrusted forks or require an environment gate.",
+    check({ lines, raw }) {
+      if (!/(pull_request|pull_request_target|issues|issue_comment)/.test(raw)) return [];
+      const out = [];
+      lines.forEach((line, i) => {
+        if (/runs-on:\s*(\[.*self-hosted.*\]|self-hosted)/i.test(line)) {
+          out.push({ line: i + 1, field: "runs-on", value: "self-hosted", message: "Self-hosted runner used on untrusted PR or issue event" });
+        }
+      });
+      return out;
+    }
+  },
+  {
+    id: "FG009",
+    severity: "MEDIUM",
+    title: "Workflow missing explicit top-level permissions block",
+    rationale:
+      "A workflow without a top-level permissions: block inherits the repository's default GITHUB_TOKEN permissions, which may grant write access to issues, checks, or contents.",
+    remediation: "Define an explicit top-level 'permissions: contents: read' block to enforce least privilege.",
+    check({ lines, raw }) {
+      if (!/^\s*permissions\s*:/m.test(raw)) {
+        return [{ line: 1, field: "permissions", value: "missing", message: "Workflow lacks an explicit top-level permissions block" }];
+      }
+      return [];
+    }
   }
 ];

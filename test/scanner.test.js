@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { scan, scanFile, expandInputs } from "../src/scanner.js";
@@ -10,9 +11,9 @@ import { run, EXIT } from "../src/cli.js";
 const here = path.dirname(fileURLToPath(import.meta.url));
 const fixture = (n) => path.join(here, "fixtures", n);
 
-test("RULES has 7 unique documented rules", () => {
-  assert.equal(RULES.length, 7);
-  assert.equal(new Set(RULES.map((r) => r.id)).size, 7);
+test("RULES has 9 unique documented rules", () => {
+  assert.equal(RULES.length, 9);
+  assert.equal(new Set(RULES.map((r) => r.id)).size, 9);
   for (const r of RULES) {
     assert.match(r.id, /^FG\d{3}$/);
     assert.ok(["HIGH", "MEDIUM", "LOW"].includes(r.severity));
@@ -47,6 +48,48 @@ test("directory expansion finds YAML files", () => {
   const files = expandInputs([path.join(here, "fixtures")]);
   assert.ok(files.length >= 2);
   assert.ok(files.every((f) => f.endsWith(".yml")));
+});
+
+test("FG008 flags self-hosted runners on pull_request workflows", () => {
+  const content = `
+name: Untrusted PR
+on: pull_request
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - run: echo test
+`;
+  const f = path.join(here, ".tmp-self-hosted.yml");
+  fs.writeFileSync(f, content);
+  try {
+    const ids = scanFile(f).findings.map((x) => x.ruleId);
+    assert.ok(ids.includes("FG008"), "should flag self-hosted runner on PR");
+  } finally {
+    fs.unlinkSync(f);
+  }
+});
+
+test("FG009 flags missing top-level permissions block", () => {
+  const content = `
+name: Missing permissions
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo test
+`;
+  const f = path.join(here, ".tmp-no-perm.yml");
+  fs.writeFileSync(f, content);
+  try {
+    const ids = scanFile(f).findings.map((x) => x.ruleId);
+    assert.ok(ids.includes("FG009"), "should flag missing top-level permissions");
+  } finally {
+    fs.unlinkSync(f);
+  }
 });
 
 test("missing file yields read error", () => {
