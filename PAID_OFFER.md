@@ -40,7 +40,7 @@ no platform fees, no tax attestation by the assistant.
 
 ### Truthful seller qualification (verbatim or not at all)
 
-> I'm Siddharth, an independent developer and BCA candidate (expected 2027). I built `flowguard`, an
+> I'm Siddharth, an independent AI-assisted developer based in Lucknow, India. I built `flowguard`, an
 > open-source, zero-dependency line-based security linter for GitHub Actions workflows with 7 documented
 > rules and 8 passing tests. I offer a fixed-scope static workflow review — no workflow execution, no
 > repository or secret access. I'll show source and test results before you pay.
